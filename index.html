@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Sistema — Solo Leveling Dashboard</title>
+  
+  <!-- Configuración para App de iPhone (iOS) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="El Sistema">
+
+  <!-- Tailwind CSS para estilos de videojuego -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & React-DOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel para procesar código JSX en vivo -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-black text-blue-50 selection:bg-blue-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const SoloLevelingDashboard = () => {
+      // 1. HISTORIAL DE DATOS
+      const weightLogs = [
+        { semana: "Sem 1", fecha: "2026-08-01", peso: 96.0 },
+        { semana: "Sem 2", fecha: "2026-08-08", peso: 95.3 },
+        { semana: "Sem 3", fecha: "2026-08-15", peso: 94.6 },
+        { semana: "Sem 4", fecha: "2026-08-22", peso: 94.0 },
+        { semana: "Sem 5", fecha: "2026-08-29", peso: 93.2 },
+        { semana: "Sem 6", fecha: "2026-09-05", peso: 92.5 }
+      ];
+
+      const gymLogs = [
+        { fecha: "Sesión 1", pressBanca: 50, curlBiceps: 12, repsTotales: 64 },
+        { fecha: "Sesión 2", pressBanca: 55, curlBiceps: 14, repsTotales: 72 },
+        { fecha: "Sesión 3", pressBanca: 60, curlBiceps: 14, repsTotales: 80 },
+        { fecha: "Sesión 4", pressBanca: 65, curlBiceps: 16, repsTotales: 88 },
+        { fecha: "Sesión 5", pressBanca: 70, curlBiceps: 18, repsTotales: 96 },
+        { fecha: "Sesión 6", pressBanca: 75, curlBiceps: 18, repsTotales: 104 }
+      ];
+
+      const basketLogs = [
+        { fecha: "Sesión 1", tiempoFT: 26.0, tiempo3PT: 32.0 },
+        { fecha: "Sesión 2", tiempoFT: 24.5, tiempo3PT: 29.0 },
+        { fecha: "Sesión 3", tiempoFT: 22.0, tiempo3PT: 27.5 },
+        { fecha: "Sesión 4", tiempoFT: 20.0, tiempo3PT: 25.0 },
+        { fecha: "Sesión 5", tiempoFT: 18.5, tiempo3PT: 23.0 },
+        { fecha: "Sesión 6", tiempoFT: 17.0, tiempo3PT: 21.0 }
+      ];
+
+      const METAS = {
+        pressBancaTarget: 90,
+        curlBicepsTarget: 20,
+        pesoInicial: 96.0,
+      };
+
+      // 2. RESUMEN DE CÁLCULOS
+      const statsSummary = useMemo(() => {
+        const currentWeight = weightLogs[weightLogs.length - 1].peso;
+        const weightChange = (currentWeight - METAS.pesoInicial).toFixed(1);
+        const maxBench = Math.max(...gymLogs.map(l => l.pressBanca));
+        const maxCurl = Math.max(...gymLogs.map(l => l.curlBiceps));
+        const totalReps = gymLogs.reduce((acc, l) => acc + l.repsTotales, 0);
+        const bestFT = Math.min(...basketLogs.map(l => l.tiempoFT));
+        const best3PT = Math.min(...basketLogs.map(l => l.tiempo3PT));
+
+        return {
+          currentWeight,
+          weightChange,
+          maxBench,
+          maxCurl,
+          totalReps,
+          bestFT,
+          best3PT,
+          benchProgress: Math.min((maxBench / METAS.pressBancaTarget) * 100, 100).toFixed(0),
+          curlProgress: Math.min((maxCurl / METAS.curlBicepsTarget) * 100, 100).toFixed(0)
+        };
+      }, [weightLogs, gymLogs, basketLogs]);
+
+      const [activeTab, setActiveTab] = useState('peso');
+
+      return (
+        <div className="min-h-screen bg-black text-blue-50 p-4 md:p-8 font-mono">
+          <div className="fixed inset-0 pointer-events-none border-4 md:border-8 border-blue-900/30 shadow-[inset_0_0_100px_rgba(0,0,150,0.25)] z-50"></div>
+
+          <div className="max-w-6xl mx-auto relative z-10 space-y-8">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] uppercase">
+                [ VENTANA DE ESTADO — SISTEMA ]
+              </h1>
+              <p className="text-xs md:text-sm text-blue-400 tracking-[0.3em] uppercase">
+                MONITOREO DE PARÁMETROS BIOMÉTRICOS Y RENDIMIENTO
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-gray-900/90 border border-blue-500/50 p-6 rounded shadow-[0_0_25px_rgba(59,130,246,0.15)] relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-600"></div>
+
+                <div>
+                  <h2 className="text-xl font-bold text-blue-300 border-b border-blue-800/60 pb-2 mb-4 uppercase flex justify-between items-center">
+                    <span>Perfil de Cazador</span>
+                    <span className="text-xs text-blue-500">ID: #0096</span>
+                  </h2>
+
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Estatura:</span>
+                      <span className="text-white font-bold">1.76 m</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Peso Inicial:</span>
+                      <span className="text-gray-300">96.0 kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Peso Actual:</span>
+                      <span className="text-cyan-300 font-bold">{statsSummary.currentWeight} kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Variación Corporal:</span>
+                      <span className={`font-bold ${parseFloat(statsSummary.weightChange) <= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {statsSummary.weightChange} kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-blue-900/50 mt-6">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-lg font-bold text-blue-300">NIVEL 18</span>
+                    <span className="text-xs text-blue-400">92% XP</span>
+                  </div>
+                  <div className="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden border border-blue-900">
+                    <div className="h-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,1)] w-[92%] transition-all duration-1000"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 bg-gray-900/90 border border-blue-500/50 p-6 rounded shadow-[0_0_25px_rgba(59,130,246,0.15)] space-y-4">
+                <h2 className="text-xl font-bold text-blue-300 border-b border-blue-800/60 pb-2 uppercase flex items-center">
+                  <span className="mr-2">⚡</span> Estadísticas de Combate
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm">
+                  <div className="bg-black/60 p-3.5 border border-red-900/40 rounded">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-400">FUERZA: Press Banca</span>
+                      <span className="text-red-400 font-bold">{statsSummary.maxBench} kg / {METAS.pressBancaTarget} kg</span>
+                    </div>
+                    <div className="w-full bg-gray-800 h-1.5 rounded">
+                      <div className="bg-red-500 h-1.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.8)]" style={{ width: `${statsSummary.benchProgress}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/60 p-3.5 border border-purple-900/40 rounded">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-400">FUERZA: Curl Bíceps</span>
+                      <span className="text-purple-400 font-bold">{statsSummary.maxCurl} kg / {METAS.curlBicepsTarget} kg</span>
+                    </div>
+                    <div className="w-full bg-gray-800 h-1.5 rounded">
+                      <div className="bg-purple-500 h-1.5 rounded shadow-[0_0_8px_rgba(168,85,247,0.8)]" style={{ width: `${statsSummary.curlProgress}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/60 p-3.5 border border-cyan-900/40 rounded">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-400">TIRO LIBRE (Meta 100)</span>
+                      <span className="text-cyan-400 font-bold">Récord: {statsSummary.bestFT} min</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/60 p-4 border border-yellow-900/40 rounded">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-400">3 PUNTOS (Meta 70)</span>
+                      <span className="text-yellow-400 font-bold">Récord: {statsSummary.best3PT} min</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-900/90 border border-blue-500/50 p-6 rounded shadow-[0_0_25px_rgba(59,130,246,0.15)] space-y-6">
+              <div className="flex flex-wrap gap-2 border-b border-blue-900/60 pb-3">
+                <button onClick={() => setActiveTab('peso')} className={`px-4 py-2 text-xs md:text-sm font-bold uppercase rounded ${activeTab === 'peso' ? 'bg-blue-600 text-white' : 'bg-black/50 text-gray-400'}`}>⚖️ Peso (Base 96kg)</button>
+                <button onClick={() => setActiveTab('tiros')} className={`px-4 py-2 text-xs md:text-sm font-bold uppercase rounded ${activeTab === 'tiros' ? 'bg-cyan-600 text-white' : 'bg-black/50 text-gray-400'}`}>🎯 Tiempos de Tiros</button>
+                <button onClick={() => setActiveTab('fuerza')} className={`px-4 py-2 text-xs md:text-sm font-bold uppercase rounded ${activeTab === 'fuerza' ? 'bg-red-600 text-white' : 'bg-black/50 text-gray-400'}`}>🏋️ Fuerza</button>
+                <button onClick={() => setActiveTab('resistencia')} className={`px-4 py-2 text-xs md:text-sm font-bold uppercase rounded ${activeTab === 'resistencia' ? 'bg-yellow-600 text-white' : 'bg-black/50 text-gray-400'}`}>🔥 Resistencia</button>
+              </div>
+
+              <div className="bg-black/70 p-4 border border-blue-900/40 rounded">
+                {activeTab === 'peso' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-xs text-gray-400">
+                      <span>PUNTO DE PARTIDA: <strong className="text-white">96.0 kg</strong></span>
+                      <span>ÚLTIMO REGISTRO: <strong className="text-cyan-400">{statsSummary.currentWeight} kg</strong></span>
+                    </div>
+                    <div className="h-64 w-full flex items-end justify-between gap-2 pt-8 pb-4 px-2 border-b border-blue-900/60 relative">
+                      <div className="absolute top-8 left-0 right-0 border-b border-dashed border-red-500/40 flex justify-end">
+                        <span className="text-[10px] text-red-400 bg-black/80 px-1 -mt-2">Base 96.0 kg</span>
+                      </div>
+                      {weightLogs.map((log, index) => (
+                        <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                          <div className="w-full bg-gradient-to-t from-blue-900 via-cyan-600 to-cyan-400 rounded-t" style={{ height: `${Math.max(((log.peso - 85) / (98 - 85)) * 100, 10)}%` }}></div>
+                          <span className="text-[10px] text-gray-400">{log.semana}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'tiros' && (
+                  <div className="h-64 w-full flex items-end justify-between gap-4 pt-6 pb-4 px-2 border-b border-blue-900/60">
+                    {basketLogs.map((log, index) => (
+                      <div key={index} className="flex-1 flex items-end justify-center gap-1 h-full">
+                        <div className="flex-1 bg-cyan-500/80 rounded-t" style={{ height: `${(log.tiempoFT / 35) * 100}%` }}></div>
+                        <div className="flex-1 bg-yellow-500/80 rounded-t" style={{ height: `${(log.tiempo3PT / 35) * 100}%` }}></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === 'fuerza' && (
+                  <div className="h-64 w-full flex items-end justify-between gap-4 pt-6 pb-4 px-2 border-b border-blue-900/60">
+                    {gymLogs.map((log, index) => (
+                      <div key={index} className="flex-1 flex items-end justify-center gap-1.5 h-full">
+                        <div className="flex-1 bg-red-600/80 rounded-t" style={{ height: `${(log.pressBanca / METAS.pressBancaTarget) * 100}%` }}></div>
+                        <div className="flex-1 bg-purple-600/80 rounded-t" style={{ height: `${(log.curlBiceps / METAS.curlBicepsTarget) * 100}%` }}></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === 'resistencia' && (
+                  <div className="h-64 w-full flex items-end justify-between gap-3 pt-6 pb-4 px-2 border-b border-blue-900/60">
+                    {gymLogs.map((log, index) => (
+                      <div key={index} className="flex-1 flex flex-col items-center h-full justify-end">
+                        <div className="w-full bg-gradient-to-t from-yellow-700 to-yellow-400 rounded-t" style={{ height: `${(log.repsTotales / 120) * 100}%` }}></div>
+                        <span className="text-[9px] text-gray-500 mt-2">{log.fecha}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<SoloLevelingDashboard />);
+  </script>
+</body>
+</html>
